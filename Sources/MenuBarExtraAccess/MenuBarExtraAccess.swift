@@ -101,7 +101,6 @@ struct MenuBarExtraAccess<Content: Scene>: Scene {
         
         observerContainer.setupEventsMonitor {
             MenuBarExtraUtils.newEventsMonitor { _ in
-                // close window when user clicks outside of it
                 MenuBarExtraUtils.setPresented(for: .index(index), state: false)
                 isMenuPresented = false
             }
@@ -109,39 +108,31 @@ struct MenuBarExtraAccess<Content: Scene>: Scene {
         
         return 0
     }
-    
+
     private var observerContainer = ObserverContainer()
     
     private class ObserverContainer {
         private var observer: NSStatusItem.ButtonStateObserver?
         private var eventsMonitor: Any?
         private var statusItemIntrospectionSetup: Bool = false
-        
+
         init() { }
-        
-        func setupStatusItemIntrospection(
-            _ block: @escaping () -> Void
-        ) {
+
+        func setupStatusItemIntrospection(_ block: @escaping () -> Void) {
             guard !statusItemIntrospectionSetup else { return }
-            // run async so that it can execute after SwiftUI sets up the NSStatusItem
+            statusItemIntrospectionSetup = true
             DispatchQueue.main.async {
                 block()
             }
         }
-        
-        func setupObserver(
-            _ block: @escaping () -> NSStatusItem.ButtonStateObserver?
-        ) {
-            // run async so that it can execute after SwiftUI sets up the NSStatusItem
+
+        func setupObserver(_ block: @escaping () -> NSStatusItem.ButtonStateObserver?) {
             DispatchQueue.main.async { [self] in
                 observer = block()
             }
         }
-        
-        func setupEventsMonitor(
-            _ block: @escaping () -> Any?
-        ) {
-            // run async so that it can execute after SwiftUI sets up the NSStatusItem
+
+        func setupEventsMonitor(_ block: @escaping () -> Any?) {
             DispatchQueue.main.async { [self] in
                 eventsMonitor = block()
             }
